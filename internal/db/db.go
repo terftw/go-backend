@@ -9,7 +9,7 @@ import (
 	"github.com/terftw/go-backend/internal/config"
 )
 
-func NewConnection(cfg *config.DatabaseConfig) (*gorm.DB, error) {
+func Connect(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=require TimeZone=UTC",
 		cfg.Host,

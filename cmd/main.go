@@ -2,21 +2,25 @@ package main
 
 import (
 	// "context"
-	// "fmt"
+	"fmt"
 	"log"
+	"net/http"
+
 	// "net/http"
 	// "os"
 	// "os/signal"
 	// "time"
 
-	// "github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5"
 	// "github.com/go-chi/chi/v5/middleware"
 	// "github.com/go-chi/cors"
 	"github.com/joho/godotenv"
-	// "gorm.io/gorm"
 
+	"github.com/terftw/go-backend/internal/api/handlers"
+	"github.com/terftw/go-backend/internal/api/routes"
 	"github.com/terftw/go-backend/internal/config"
 	"github.com/terftw/go-backend/internal/db"
+	"github.com/terftw/go-backend/internal/db/repositories"
 )
 
 func main() {
@@ -29,16 +33,20 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	db, err := db.NewConnection(&config.Database)
+	db, err := db.Connect(&config.Database)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	var result int
-	db.Raw("SELECT 1").Scan(&result)
-	log.Printf("Database connection test: %d", result)
+	repos := repositories.NewRepository(db)
+	handlers := handlers.NewHandlers(repos.UserRepository, config.OAuth.GoogleOAuth, config.PrivateKey)
 
-	go func() {
-		log.Printf("Server starting on port %d", config.Server.Port)
-	}()
+	router := chi.NewRouter()
+	routes.SetupRoutes(router, handlers)
+
+	addr := fmt.Sprintf(":%d", config.Server.Port)
+	log.Printf("Server starting on port %d", config.Server.Port)
+	if err := http.ListenAndServe(addr, router); err != nil {
+		log.Fatal(err)
+	}
 }

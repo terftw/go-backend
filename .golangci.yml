@@ -1,0 +1,35 @@
+linters:
+  enable:
+    - gofmt # Standard Go formatting
+    - goimports # Manages imports
+    - govet # Reports suspicious code
+    - gosimple # Simplifies code
+    - staticcheck # Static analysis
+    - errcheck # Error handling checks
+    - ineffassign # Finds ineffective assignments
+    - revive # Drop-in replacement for golint
+    - misspell # Finds commonly misspelled words
+    - lll # Line length limits
+
+linters-settings:
+  lll:
+    line-length: 120
+  gofmt:
+    simplify: true
+  revive:
+    rules:
+      - name: exported
+        severity: warning
+        disabled: false
+
+run:
+  deadline: 5m
+  tests: true
+
+issues:
+  exclude-dirs:
+    - vendor/
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - lll
